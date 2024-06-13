@@ -2,30 +2,40 @@ from django.db import models
 
 # Create your models here.
 
+class Promotion(models.Model):
+    description = models.CharField(max_length=255)
+    discout = models.FloatField()
+
+class Collection(models.Model):
+    title = models.CharField(max_length==255)
+    featured_product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, related_name='+') #here we have 2 ways to avoid the reverse relationship bcz we will face name clash.
+                                                                                                            #related_name='different name for collection'.
+                                                                                                            # #"related_name='+'":-this tells django not to create reverse relationship.
 class Product(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=6 , decimal_places=2)  #always use DecimalField on monatory values as FloatField has rounding issues.  
+    inventory = models.IntegerField()
+    last_update = models.DateTimeField(auto_now=True)
+    collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
+    promotions = models.ManytoManyField(Promotion) #for many_to_many relationship
+
+class Customer(models.Model):
     MEMBERSHIP_BRONZE = 'B'
     MEMBERSHIP_SILVER = 'S'
     MEMBERSHIP_GOLD = 'G'
-
 
     MEMBERSHIP_CHOICES = [
         (MEMBERSHIP_BRONZE,'Bronze'),
         (MEMBERSHIP_SILVER,'Silver'),
         (MEMBERSHIP_GOLD,'Gold')
     ]
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=6 , decimal_places=2)  #always use DecimalField on monatory values as FloatField has rounding issues.  
-    inventory = models.IntegerField()
-    last_update = models.DateTimeField(auto_now=True)
-    membership = models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
-
-class Customer(models.Model):
     first_name = models.Charfield(max_length=255)
     last_name = models.Charfield(max_length=255)
     email = models.EmailField(unique=True)
     phone = models.Charfield(max_length=255)
     birth_date = models.DateField(null=True)
+    membership = models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
 
 class order(models.Model):
     PAYMENT_PENDING = 'P'
@@ -40,8 +50,24 @@ class order(models.Model):
 
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.Charfield(max_lenght=1, choices=PAYMENT_CHOICES, default=PAYMENT_PENDING)
+    customer = models.ForiegnKey(Costumer , on_delete=models.PROTECT)
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.PROTECT)
+    product = models.ForeigKey(Product, on_delete=models.PROTECT)
+    quantity = models.PositiveSmallIntegerField()
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
 
 class Address(models.Model):
     street = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
-    customer = models.OnetoOneField(Customer, on_delete=models.CASCADE, primary_key=True)
+    customer = models.OnetoOneField(Customer, on_delete=models.CASCADE, primary_key=True) #for one_to_one relationship
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE) #for one_to_many relationship
+
+class Cart(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveSmallIntegerField()
