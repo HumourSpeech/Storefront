@@ -67,6 +67,7 @@ class Address(models.Model):
     city = models.CharField(max_length=255)
     customer = models.OneToOneField(Customer, on_delete=models.CASCADE, primary_key=True) #for one_to_one relationship
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE) #for one_to_many relationship
+    zip = models.IntegerField(default=0)
 
 class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
