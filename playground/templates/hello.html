@@ -7,3 +7,14 @@
     Hello Friends.
 </h1>
 {% endif %}
+<table>
+    <ul>
+        {% for product in products %}
+        <li>{{ product.title }}</li>
+        {% endfor %}
+        <!-- {% for dt in LAST_DATE %}
+        <li>{{ dt.unit_price }}</li>
+        <li>{{ dt.title }}</li>
+        {% endfor %} -->
+    </ul>
+</table>
